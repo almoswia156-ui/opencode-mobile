@@ -2,6 +2,8 @@ name: Build Android APK
 
 on:
   workflow_dispatch:
+  push:
+    branches: [ main, master ]
 
 jobs:
   build:
@@ -22,20 +24,22 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Debug package manager
-        run: |
-          node -v
-          npm -v
-          npm install -g pnpm
-          pnpm -v
-          ls
-          cat package.json
+      - name: Show package.json
+        run: cat package.json
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: npm install
 
-      - name: Generate android folder
-        run: npx expo prebuild --platform android
+      - name: Fix Expo dependency versions
+        run: npx expo install --fix
+
+      - name: Run Expo Doctor
+        run: npx expo-doctor
+
+      - name: Generate android
+        env:
+          EXPO_NO_GIT_STATUS: 1
+        run: npx expo prebuild --platform android --clean --non-interactive
 
       - name: Grant permission
         run: chmod +x android/gradlew
