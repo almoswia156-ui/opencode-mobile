@@ -2,8 +2,6 @@ name: Build Android APK
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ main, master ]
 
 jobs:
   build:
@@ -24,17 +22,20 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Show package.json
-        run: cat package.json
+      - name: Debug package manager
+        run: |
+          node -v
+          npm -v
+          npm install -g pnpm
+          pnpm -v
+          ls
+          cat package.json
 
       - name: Install dependencies
-        run: npm install
+        run: pnpm install --no-frozen-lockfile
 
-      - name: Check Expo
-        run: npx expo --version
-
-      - name: Generate android
-        run: npx expo prebuild --platform android --clean --non-interactive
+      - name: Generate android folder
+        run: npx expo prebuild --platform android
 
       - name: Grant permission
         run: chmod +x android/gradlew
